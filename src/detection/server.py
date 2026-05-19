@@ -13,6 +13,10 @@ from fastapi.responses import Response, JSONResponse
 
 from pipeline_stream import PipelineStream, FrameState
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "signals"))
+from sumo_stream import SumoStream
+
 ROOT = Path(__file__).resolve().parents[2]
 VIDEO = ROOT / "data/videos/traffic_sample.mp4"
 CALIB = ROOT / "outputs/calibration.json"
@@ -56,10 +60,42 @@ def _pipeline_thread():
             time.sleep(sleep)
         last_emit = time.time()
 
+sumo = SumoStream()
+
 @app.on_event("startup")
-def start_pipeline():
-    t = Thread(target=_pipeline_thread, daemon=True)
-    t.start()
+def start_threads():
+    Thread(target=_pipeline_thread, daemon=True).start()
+    Thread(target=sumo.run_forever, daemon=True).start()
+
+@app.get("/signal/state")
+def signal_state():
+    return sumo.state
+
+@app.get("/signal/comparison")
+def signal_comparison():
+    """returns the fixed vs adaptive headline from the offline benchmark."""
+    fixed_path = ROOT / "src/signals/fixed_log.json"
+    adaptive_path = ROOT / "src/signals/adaptive_log.json"
+    if not (fixed_path.exists() and adaptive_path.exists()):
+        return JSONResponse({"status": "no_benchmark"}, status_code=503)
+    f = json.loads(fixed_path.read_text())["summary"]
+    a = json.loads(adaptive_path.read_text())["summary"]
+    return {
+        "fixed": f,
+        "adaptive": a,
+        "wait_improvement_pct": round((f["avg_wait_time_sec"] - a["avg_wait_time_sec"]) / f["avg_wait_time_sec"] * 100, 1),
+        "travel_improvement_pct": round((f["avg_travel_time_sec"] - a["avg_travel_time_sec"]) / f["avg_travel_time_sec"] * 100, 1),
+        "clear_improvement_pct": round((f["duration_sec"] - a["duration_sec"]) / f["duration_sec"] * 100, 1),
+    }
+
+@app.post("/signal/preempt")
+def signal_preempt(direction: str):
+    """trigger emergency green for NS or EW direction."""
+    direction = direction.upper()
+    if direction not in ("NS", "EW"):
+        return JSONResponse({"error": "direction must be NS or EW"}, status_code=400)
+    sumo.request_preempt(direction)
+    return {"requested": direction}
 
 @app.get("/")
 def root():
