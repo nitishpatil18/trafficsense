@@ -59,9 +59,9 @@ class PipelineStream:
     def run(self, loop: bool = True) -> Iterator[FrameState]:
         """yields FrameState objects per frame. if loop=true, restarts at end."""
         model = YOLO(str(self.model_path))
-        detector = IncidentDetector(fps=self.fps_in)
 
         while True:
+            detector = IncidentDetector(fps=self.fps_in)
             history = defaultdict(lambda: deque(maxlen=SMOOTH_WINDOW))
             smoothed_speed = {}
             last_side = {}
