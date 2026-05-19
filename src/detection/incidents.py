@@ -69,7 +69,7 @@ class IncidentDetector:
         min_samples = int(self.min_track_age_sec * self.fps)
         if len(self.speed_history[track_id]) < min_samples:
             return events
-        print(f"[INCIDENT GUARD PASSED] tid={track_id} frame={frame_idx} hist_len={len(self.speed_history[track_id])} min={min_samples} fps={self.fps}", flush=True)
+
 
         # STOPPED check
         if (median_speed_kmh >= self.min_median_kmh

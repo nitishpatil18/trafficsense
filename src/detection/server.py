@@ -61,6 +61,14 @@ def _pipeline_thread():
                 events_log.extend(fs.new_events)
                 if len(events_log) > 200:
                     del events_log[:-200]
+                # AUTO-PREEMPT: any HIGH incident triggers sumo signal preempt
+                high_events = [e for e in fs.new_events if e.get("severity") == "HIGH"]
+                if high_events:
+                    e = high_events[0]
+                    cx = e.get("position", [0, 0])[0]
+                    direction = "NS" if cx < 640 else "EW"
+                    sumo.request_preempt(direction)
+                    print(f"[AUTO-PREEMPT] {e['event_type']} severity={e['severity']} -> {direction}")
                 # notify subscribers without blocking
                 for q in list(event_subscribers):
                     try:
@@ -110,6 +118,30 @@ def signal_preempt(direction: str):
         return JSONResponse({"error": "direction must be NS or EW"}, status_code=400)
     sumo.request_preempt(direction)
     return {"requested": direction}
+
+@app.post("/debug/fake_incident")
+def fake_incident(direction: str = "NS"):
+    """inject a fake HIGH incident for demo purposes."""
+    fake = {
+        "frame": current.frame_idx if current else 0,
+        "time_sec": current.time_sec if current else 0.0,
+        "track_id": -1,
+        "vehicle_class": "demo",
+        "event_type": "SUDDEN_BRAKE",
+        "severity": "HIGH",
+        "speed_kmh": 2.0,
+        "median_speed_kmh": 30.0,
+        "position": [200 if direction.upper() == "NS" else 1000, 400],
+    }
+    with state_lock:
+        events_log.append(fake)
+        for q in list(event_subscribers):
+            try:
+                q.put_nowait([fake])
+            except asyncio.QueueFull:
+                pass
+    sumo.request_preempt(direction.upper())
+    return {"injected": fake, "preempt": direction.upper()}
 
 @app.get("/")
 def root():
