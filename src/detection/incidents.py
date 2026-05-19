@@ -34,7 +34,7 @@ class IncidentDetector:
         stopped_duration_sec: float = 3.0,
         min_median_kmh: float = 8.0,
         brake_drop_kmh: float = 25.0,
-        brake_min_peak_kmh: float = 25.0,   # NEW: must have been going fast before braking counts
+        brake_min_peak_kmh: float = 25.0,
         brake_window_sec: float = 0.5,
         cooldown_sec: float = 8.0,
     ):

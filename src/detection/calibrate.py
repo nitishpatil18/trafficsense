@@ -6,8 +6,8 @@ import json
 from pathlib import Path
 import cv2
 
-INPUT_VIDEO = Path("data/videos/traffic_sample.mp4")
-CALIB_FILE = Path("outputs/calibration.json")
+INPUT_VIDEO = Path("data/videos/incident_sample.mp4")
+CALIB_FILE = Path("outputs/calibration_incident.json")
 
 clicks = []
 line_pts = []
