@@ -20,7 +20,7 @@ from sumo_stream import SumoStream
 ROOT = Path(__file__).resolve().parents[2]
 VIDEO = ROOT / "data/videos/traffic_sample.mp4"
 CALIB = ROOT / "outputs/calibration.json"
-MODEL = ROOT / "models/yolov8n.pt"
+MODEL = ROOT / "models/yolov8s.pt"
 
 app = FastAPI(title="TrafficSense API")
 app.add_middleware(
@@ -42,11 +42,25 @@ def _pipeline_thread():
     stream = PipelineStream(VIDEO, CALIB, MODEL)
     last_emit = time.time()
     target_dt = 1.0 / stream.fps_in
+    last_frame_idx = -1
     for fs in stream.run(loop=True):
+        # detect video loop restart -> clear stale events
+        if fs.frame_idx < last_frame_idx:
+            with state_lock:
+                events_log.clear()
+                for q in list(event_subscribers):
+                    try:
+                        q.put_nowait([{"_clear": True}])
+                    except asyncio.QueueFull:
+                        pass
+        last_frame_idx = fs.frame_idx
+
         with state_lock:
             current = fs
             if fs.new_events:
                 events_log.extend(fs.new_events)
+                if len(events_log) > 200:
+                    del events_log[:-200]
                 # notify subscribers without blocking
                 for q in list(event_subscribers):
                     try:

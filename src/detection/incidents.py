@@ -83,8 +83,8 @@ class IncidentDetector:
                         position=(round(position[0], 1), round(position[1], 1)),
                     ))
 
-        # SUDDEN_BRAKE check
-        if len(self.speed_history[track_id]) >= self.brake_window:
+        # SUDDEN_BRAKE check (require warmup: at least 2x brake_window of history)
+        if len(self.speed_history[track_id]) >= self.brake_window * 2:
             window = list(self.speed_history[track_id])[-self.brake_window:]
             drop = max(window) - min(window)
             # ensure direction is "high then low"

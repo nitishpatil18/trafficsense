@@ -51,7 +51,11 @@ export default function App() {
             );
           }
         } else if (msg.type === "events") {
-          setEvents((prev) => [...msg.events.reverse(), ...prev].slice(0, 50));
+          if (msg.events.length === 1 && msg.events[0]._clear) {
+            setEvents([]);
+          } else {
+            setEvents((prev) => [...msg.events.reverse(), ...prev].slice(0, 50));
+          }
         }
       };
     };
