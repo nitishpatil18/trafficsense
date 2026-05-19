@@ -5,9 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "fastapi>=0.136.1",
     "lapx>=0.9.4",
     "numpy>=2.4.6",
     "opencv-python>=4.13.0.92",
     "pillow>=12.2.0",
     "ultralytics>=8.4.51",
+    "uvicorn[standard]>=0.47.0",
+    "websockets>=16.0",
+]
+
+[dependency-groups]
+dev = [
+    "websockets>=16.0",
 ]
