@@ -19,7 +19,8 @@ OUTPUT_SUMMARY = Path("outputs/pipeline_summary.json")
 CALIB_FILE = Path("outputs/calibration.json")
 MODEL_PATH = Path("models/yolov8n.pt")
 CONF_THRESHOLD = 0.35
-SMOOTH_WINDOW = 10
+SMOOTH_WINDOW = 30
+EMA_ALPHA = 0.25
 
 VEHICLE_CLASSES = {1: "bicycle", 2: "car", 3: "motorcycle", 5: "bus", 7: "truck"}
 
@@ -55,6 +56,7 @@ def main():
     last_side = {}
     counted_in, counted_out = set(), set()
     track_class = {}
+    smoothed_speed = {}     # NEW: tid -> ema-smoothed speed
     all_events = []
     active_event_flashes = {}   # tid -> frame_idx when last fired (for visual flash)
 
@@ -96,6 +98,10 @@ def main():
                         pix = ((xc-x0)**2 + (yc-y0)**2) ** 0.5
                         sec = (f1-f0) / fps_in
                         speed_kmh = (pix * mpp / sec) * 3.6
+                # ema smooth to kill centroid-jitter noise
+                prev = smoothed_speed.get(tid, speed_kmh)
+                speed_kmh = EMA_ALPHA * speed_kmh + (1 - EMA_ALPHA) * prev
+                smoothed_speed[tid] = speed_kmh
                 frame_speeds.append(speed_kmh)
                 frame_track_data.append((tid, name, cx, cy, speed_kmh, (x1, y1, x2, y2)))
 

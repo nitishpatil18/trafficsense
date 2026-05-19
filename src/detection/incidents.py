@@ -30,18 +30,20 @@ class IncidentDetector:
     def __init__(
         self,
         fps: float,
-        stopped_ratio: float = 0.25,        # vehicle slower than this * median => suspect
-        stopped_duration_sec: float = 2.0,  # must persist this long
-        min_median_kmh: float = 3.0,        # don't fire stopped if everyone's stopped
-        brake_drop_kmh: float = 15.0,       # drop magnitude to flag
-        brake_window_sec: float = 0.6,      # over this window
-        cooldown_sec: float = 5.0,          # don't refire same event for same id
+        stopped_ratio: float = 0.20,
+        stopped_duration_sec: float = 3.0,
+        min_median_kmh: float = 8.0,
+        brake_drop_kmh: float = 25.0,
+        brake_min_peak_kmh: float = 25.0,   # NEW: must have been going fast before braking counts
+        brake_window_sec: float = 0.5,
+        cooldown_sec: float = 8.0,
     ):
         self.fps = fps
         self.stopped_ratio = stopped_ratio
         self.stopped_frames = int(stopped_duration_sec * fps)
         self.min_median_kmh = min_median_kmh
         self.brake_drop_kmh = brake_drop_kmh
+        self.brake_min_peak_kmh = brake_min_peak_kmh
         self.brake_window = int(brake_window_sec * fps)
         self.cooldown_frames = int(cooldown_sec * fps)
 
@@ -88,7 +90,10 @@ class IncidentDetector:
             # ensure direction is "high then low"
             peak_idx = window.index(max(window))
             trough_idx = window.index(min(window))
-            if drop >= self.brake_drop_kmh and trough_idx > peak_idx:
+            peak_speed = max(window)
+            if (drop >= self.brake_drop_kmh
+                    and peak_speed >= self.brake_min_peak_kmh
+                    and trough_idx > peak_idx):
                 if self._allow(track_id, "SUDDEN_BRAKE", frame_idx):
                     severity = "HIGH" if drop >= self.brake_drop_kmh * 1.5 else "MEDIUM"
                     events.append(Event(
