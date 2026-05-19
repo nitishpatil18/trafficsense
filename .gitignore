@@ -12,9 +12,12 @@ outputs/*
 !outputs/.gitkeep
 .env
 *.egg-info/
-.pytest_cache/bus.jpg
+.pytest_cache/
+bus.jpg
 
-# frontend
+# node (root + dashboard)
+node_modules/
 dashboard/node_modules/
 dashboard/dist/
 dashboard/.vite/
+package-lock.json
