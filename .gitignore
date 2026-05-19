@@ -13,3 +13,8 @@ outputs/*
 .env
 *.egg-info/
 .pytest_cache/bus.jpg
+
+# frontend
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.vite/

@@ -154,7 +154,14 @@ class PipelineStream:
                     cbc[n] = cbc.get(n, 0) + 1
 
                 # encode jpeg
-                ok, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
+                # downscale to 854x480 max and lower jpeg quality for streaming
+                h, w = frame.shape[:2]
+                if w > 854:
+                    new_w, new_h = 854, int(h * 854 / w)
+                    stream_frame = cv2.resize(frame, (new_w, new_h))
+                else:
+                    stream_frame = frame
+                ok, buf = cv2.imencode(".jpg", stream_frame, [cv2.IMWRITE_JPEG_QUALITY, 50])
                 jpeg = buf.tobytes() if ok else b""
 
                 yield FrameState(

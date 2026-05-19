@@ -92,6 +92,30 @@ def frame_jpg():
         if current is None or not current.jpeg_bytes:
             return Response(status_code=503)
         return Response(content=current.jpeg_bytes, media_type="image/jpeg")
+    
+@app.get("/stream.mjpg")
+def stream_mjpg():
+    """multipart mjpeg stream. one http connection, browser plays as video."""
+    from fastapi.responses import StreamingResponse
+
+    def gen():
+        boundary = b"--frame"
+        last_idx = -1
+        while True:
+            with state_lock:
+                fs = current
+            if fs is None or not fs.jpeg_bytes or fs.frame_idx == last_idx:
+                time.sleep(0.02)
+                continue
+            last_idx = fs.frame_idx
+            yield (
+                boundary + b"\r\n"
+                b"Content-Type: image/jpeg\r\n"
+                b"Content-Length: " + str(len(fs.jpeg_bytes)).encode() + b"\r\n\r\n"
+                + fs.jpeg_bytes + b"\r\n"
+            )
+
+    return StreamingResponse(gen(), media_type="multipart/x-mixed-replace; boundary=frame")
 
 @app.websocket("/ws/stream")
 async def ws_stream(ws: WebSocket):
