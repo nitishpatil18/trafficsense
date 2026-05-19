@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+data/videos/*
+data/datasets/*
+models/*.pt
+outputs/*
+!data/videos/.gitkeep
+!data/datasets/.gitkeep
+!models/.gitkeep
+!outputs/.gitkeep
+.env
+*.egg-info/
+.pytest_cache/
