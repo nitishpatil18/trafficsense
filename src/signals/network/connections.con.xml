@@ -1,0 +1,18 @@
+<connections>
+    <!-- north entering: lane 0 = right turn, lane 1 = straight + left -->
+    <connection from="n2c" to="c2e" fromLane="0" toLane="0"/>
+    <connection from="n2c" to="c2s" fromLane="1" toLane="1"/>
+    <connection from="n2c" to="c2w" fromLane="1" toLane="0"/>
+
+    <connection from="s2c" to="c2w" fromLane="0" toLane="0"/>
+    <connection from="s2c" to="c2n" fromLane="1" toLane="1"/>
+    <connection from="s2c" to="c2e" fromLane="1" toLane="0"/>
+
+    <connection from="e2c" to="c2s" fromLane="0" toLane="0"/>
+    <connection from="e2c" to="c2w" fromLane="1" toLane="1"/>
+    <connection from="e2c" to="c2n" fromLane="1" toLane="0"/>
+
+    <connection from="w2c" to="c2n" fromLane="0" toLane="0"/>
+    <connection from="w2c" to="c2e" fromLane="1" toLane="1"/>
+    <connection from="w2c" to="c2s" fromLane="1" toLane="0"/>
+</connections>

@@ -1,0 +1,32 @@
+<routes>
+    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" maxSpeed="13.89"/>
+
+    <!-- 12 possible turning movements: each of 4 inflows × 3 destinations -->
+    <route id="n_s"  edges="n2c c2s"/>
+    <route id="n_e"  edges="n2c c2e"/>
+    <route id="n_w"  edges="n2c c2w"/>
+    <route id="s_n"  edges="s2c c2n"/>
+    <route id="s_e"  edges="s2c c2e"/>
+    <route id="s_w"  edges="s2c c2w"/>
+    <route id="e_w"  edges="e2c c2w"/>
+    <route id="e_n"  edges="e2c c2n"/>
+    <route id="e_s"  edges="e2c c2s"/>
+    <route id="w_e"  edges="w2c c2e"/>
+    <route id="w_n"  edges="w2c c2n"/>
+    <route id="w_s"  edges="w2c c2s"/>
+
+    <!-- asymmetric demand: N-S corridor heavier (realistic city case) -->
+    <flow id="f_ns"  type="car" route="n_s"  begin="0" end="600" vehsPerHour="700"/>
+    <flow id="f_sn"  type="car" route="s_n"  begin="0" end="600" vehsPerHour="700"/>
+    <flow id="f_ew"  type="car" route="e_w"  begin="0" end="600" vehsPerHour="350"/>
+    <flow id="f_we"  type="car" route="w_e"  begin="0" end="600" vehsPerHour="350"/>
+
+    <flow id="f_ne"  type="car" route="n_e"  begin="0" end="600" vehsPerHour="120"/>
+    <flow id="f_nw"  type="car" route="n_w"  begin="0" end="600" vehsPerHour="120"/>
+    <flow id="f_se"  type="car" route="s_e"  begin="0" end="600" vehsPerHour="120"/>
+    <flow id="f_sw"  type="car" route="s_w"  begin="0" end="600" vehsPerHour="120"/>
+    <flow id="f_en"  type="car" route="e_n"  begin="0" end="600" vehsPerHour="60"/>
+    <flow id="f_es"  type="car" route="e_s"  begin="0" end="600" vehsPerHour="60"/>
+    <flow id="f_wn"  type="car" route="w_n"  begin="0" end="600" vehsPerHour="60"/>
+    <flow id="f_ws"  type="car" route="w_s"  begin="0" end="600" vehsPerHour="60"/>
+</routes>
