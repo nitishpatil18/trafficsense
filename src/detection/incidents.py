@@ -44,6 +44,7 @@ class IncidentDetector:
         self.min_median_kmh = min_median_kmh
         self.brake_drop_kmh = brake_drop_kmh
         self.brake_min_peak_kmh = brake_min_peak_kmh
+        self.min_track_age_sec = 1.5   # ignore brand-new tracks
         self.brake_window = int(brake_window_sec * fps)
         self.cooldown_frames = int(cooldown_sec * fps)
 
@@ -64,6 +65,10 @@ class IncidentDetector:
     ) -> list[Event]:
         self.speed_history[track_id].append(speed_kmh)
         events: list[Event] = []
+        # require track to be observed for min_track_age_sec before considering incidents
+        min_samples = int(self.min_track_age_sec * self.fps)
+        if len(self.speed_history[track_id]) < min_samples:
+            return events
 
         # STOPPED check
         if (median_speed_kmh >= self.min_median_kmh
