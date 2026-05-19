@@ -12,4 +12,4 @@ outputs/*
 !outputs/.gitkeep
 .env
 *.egg-info/
-.pytest_cache/
+.pytest_cache/bus.jpg
