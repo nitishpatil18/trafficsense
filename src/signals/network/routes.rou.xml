@@ -16,10 +16,10 @@
     <route id="w_s"  edges="w2c c2s"/>
 
     <!-- asymmetric demand: N-S corridor heavier (realistic city case) -->
-    <flow id="f_ns"  type="car" route="n_s"  begin="0" end="600" vehsPerHour="700"/>
-    <flow id="f_sn"  type="car" route="s_n"  begin="0" end="600" vehsPerHour="700"/>
-    <flow id="f_ew"  type="car" route="e_w"  begin="0" end="600" vehsPerHour="350"/>
-    <flow id="f_we"  type="car" route="w_e"  begin="0" end="600" vehsPerHour="350"/>
+    <flow id="f_ns"  type="car" route="n_s"  begin="0" end="600" vehsPerHour="500"/>
+    <flow id="f_sn"  type="car" route="s_n"  begin="0" end="600" vehsPerHour="500"/>
+    <flow id="f_ew"  type="car" route="e_w"  begin="0" end="600" vehsPerHour="250"/>
+    <flow id="f_we"  type="car" route="w_e"  begin="0" end="600" vehsPerHour="250"/>
 
     <flow id="f_ne"  type="car" route="n_e"  begin="0" end="600" vehsPerHour="120"/>
     <flow id="f_nw"  type="car" route="n_w"  begin="0" end="600" vehsPerHour="120"/>

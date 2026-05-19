@@ -23,8 +23,12 @@ f_travel = fixed["avg_travel_time_sec"]
 a_travel = adaptive["avg_travel_time_sec"]
 travel_improvement = (f_travel - a_travel) / f_travel * 100 if f_travel > 0 else 0.0
 
+f_clear = fixed["duration_sec"]
+a_clear = adaptive["duration_sec"]
+clear_imp = (f_clear - a_clear) / f_clear * 100 if f_clear > 0 else 0.0
+
 print("\n=== HEADLINE ===")
-print(f"avg wait time: fixed {f_wait}s  ->  adaptive {a_wait}s")
-print(f"  improvement: {improvement:+.1f}%")
-print(f"avg travel time: fixed {f_travel}s -> adaptive {a_travel}s")
-print(f"  improvement: {travel_improvement:+.1f}%")
+print(f"avg wait time:     fixed {f_wait:>6}s  ->  adaptive {a_wait:>6}s   ({improvement:+.1f}%)")
+print(f"avg travel time:   fixed {f_travel:>6}s  ->  adaptive {a_travel:>6}s   ({travel_improvement:+.1f}%)")
+print(f"queue clear time:  fixed {f_clear:>6}s  ->  adaptive {a_clear:>6}s   ({clear_imp:+.1f}%)")
+print(f"trips completed:   fixed {fixed['completed_trips']:>6}     adaptive {adaptive['completed_trips']:>6}")
