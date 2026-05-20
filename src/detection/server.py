@@ -93,13 +93,9 @@ def start_threads():
 def signal_state():
     return sumo.state
 
-@app.get("/signal/comparison")
-def signal_comparison():
-    """returns the fixed vs adaptive headline from the offline benchmark."""
-    fixed_path = ROOT / "src/signals/fixed_log.json"
-    adaptive_path = ROOT / "src/signals/adaptive_log.json"
+def _benchmark_pair(fixed_path: Path, adaptive_path: Path) -> dict | None:
     if not (fixed_path.exists() and adaptive_path.exists()):
-        return JSONResponse({"status": "no_benchmark"}, status_code=503)
+        return None
     f = json.loads(fixed_path.read_text())["summary"]
     a = json.loads(adaptive_path.read_text())["summary"]
     return {
@@ -109,6 +105,28 @@ def signal_comparison():
         "travel_improvement_pct": round((f["avg_travel_time_sec"] - a["avg_travel_time_sec"]) / f["avg_travel_time_sec"] * 100, 1),
         "clear_improvement_pct": round((f["duration_sec"] - a["duration_sec"]) / f["duration_sec"] * 100, 1),
     }
+
+@app.get("/signal/comparison")
+def signal_comparison():
+    """returns synthetic + real benchmark results."""
+    synthetic = _benchmark_pair(
+        ROOT / "src/signals/fixed_log.json",
+        ROOT / "src/signals/adaptive_log.json",
+    )
+    bengaluru = _benchmark_pair(
+        ROOT / "src/signals/fixed_log_real.json",
+        ROOT / "src/signals/adaptive_log_real.json",
+    )
+    out = {}
+    if synthetic:
+        out["synthetic"] = synthetic
+        # back-compat: top-level fields point to synthetic
+        out.update(synthetic)
+    if bengaluru:
+        out["bengaluru"] = bengaluru
+    if not out:
+        return JSONResponse({"status": "no_benchmark"}, status_code=503)
+    return out
 
 @app.post("/signal/preempt")
 def signal_preempt(direction: str):

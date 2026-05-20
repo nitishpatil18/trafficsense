@@ -7,12 +7,15 @@ import json
 from pathlib import Path
 import traci
 
-NETWORK_DIR = Path(__file__).parent / "network"
+import os
+NETWORK_NAME = os.environ.get("NETWORK", "network")   # "network" or "network_real"
+NETWORK_DIR = Path(__file__).parent / NETWORK_NAME
 SUMOCFG = NETWORK_DIR / "simulation.sumocfg"
-OUTPUT_LOG = Path(__file__).parent / "fixed_log.json"
+SUFFIX = "" if NETWORK_NAME == "network" else f"_{NETWORK_NAME.replace('network_', '')}"
+OUTPUT_LOG = Path(__file__).parent / f"fixed_log{SUFFIX}.json"
 
 def main():
-    tripinfo = Path(__file__).parent / "fixed_tripinfo.xml"
+    tripinfo = Path(__file__).parent / f"fixed_tripinfo{SUFFIX}.xml"
     sumo_cmd = [
         "sumo", "-c", str(SUMOCFG),
         "--no-warnings", "true",
@@ -37,13 +40,13 @@ def main():
 
         # accumulated waiting time per vehicle (waiting = nearly stopped)
         sec_wait = sum(traci.vehicle.getWaitingTime(v) for v in vehs)
-        # queue length per incoming edge (vehicles with speed < 0.1 m/s)
-        queue = {
-            "n2c": traci.edge.getLastStepHaltingNumber("n2c"),
-            "s2c": traci.edge.getLastStepHaltingNumber("s2c"),
-            "e2c": traci.edge.getLastStepHaltingNumber("e2c"),
-            "w2c": traci.edge.getLastStepHaltingNumber("w2c"),
-        }
+        # total queue across all edges in the network (halting = speed < 0.1 m/s)
+        queue_total = sum(
+            traci.edge.getLastStepHaltingNumber(e)
+            for e in traci.edge.getIDList()
+            if not e.startswith(":")  # skip internal junction edges
+        )
+        queue = {"total": queue_total}
         arrived += traci.simulation.getArrivedNumber()
 
         timeline.append({
@@ -85,7 +88,7 @@ def main():
     summary["avg_wait_time_sec"] = round(avg_wait, 2)
     summary["avg_travel_time_sec"] = round(avg_travel, 2)
     summary["completed_trips"] = len(waits)
-    
+
     OUTPUT_LOG.write_text(json.dumps({"summary": summary, "timeline": timeline}, indent=2))
     print(json.dumps(summary, indent=2))
     print(f"saved: {OUTPUT_LOG}")
